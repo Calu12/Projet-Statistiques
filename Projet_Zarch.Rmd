@@ -1,6 +1,6 @@
 ---
 title: "Projet Exploratoire"
-author: "Vassili ZARCH, Tristan Mathon, Coemgen Genevey"
+author: "Vassili ZARCH, Tristan Mathon,Coemgen Genevey"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -51,15 +51,11 @@ sub_kppv <- function(k,tab,tableau,x,y){
     for(i in xmin:xmax){ # on fait le tour du carré représentant les voisins
       for(j in ymin:ymax){
         if(i != 0 | j != 0 ){ #ton ne veut pas du pixel 0:0
-          print(x)
-          print(y)
-          if (x+i >= 0 & y+j>=0 & x+i <width & y+j<height){ #on veut rester dans l'image
-            print("maintenant")
-            if(isFALSE(tableau[x+i,y+j])){  #on veut pas prendre d'autres pixels blancs
-              print("pas null")
-              tab_list_R = append(tab_list_R,tab[x+i,y+j,1]) 
-              tab_list_G = append(tab_list_G,tab[x+i,y+j,2])
-              tab_list_B = append(tab_list_B,tab[x+i,y+j,3])
+          if (i >= 0 & j>=0 & i <width & j<height){ #on veut rester dans l'image
+            if(isFALSE(tableau[i,j])){  #on veut pas prendre d'autres pixels blancs
+              tab_list_R = append(tab_list_R,tab[i,j,1]) 
+              tab_list_G = append(tab_list_G,tab[i,j,2])
+              tab_list_B = append(tab_list_B,tab[i,j,3])
               compte = compte +1
               if(compte  == k){
                 result = c()
