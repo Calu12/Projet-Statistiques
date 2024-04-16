@@ -1,0 +1,165 @@
+---
+title: "Projet Exploratoire"
+author: "Vassili ZARCH"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,eval = TRUE,warning=FALSE, fig.show="hold", out.width="50%",cache = TRUE)
+```
+
+# Introduction
+## but
+```{r}
+library(class)
+source("color_utils.R")
+```
+
+Le but de ce projet est d'évaluer et de comparer les performances de l'algorithme des K plus proche voisin dans le cadre de la reconstitution d'images bruitées. 
+```{r}
+library("png")
+originale<- readPNG("StarWars.png")
+
+pourcent1<- readPNG("Image1pourcent.png")
+pourcent10<- readPNG("Image10pourcent.png")
+pourcent15<- readPNG("Image15pourcent.png")
+pourcent20<- readPNG("Image20pourcent.png")
+pourcent25<- readPNG("Image25pourcent.png")
+pourcent50<- readPNG("Image50pourcent.png")
+
+
+width<-ncol(pourcent50)
+print(width)
+height<-nrow(pourcent50)
+print(height)
+width*height
+sub_kppv <- function(k,tab,tableau,x,y){
+  distance = 1
+   width = ncol(tab)
+  heigth = nrow(tab)
+  tab_list_R = c()
+  tab_list_G = c()
+  tab_list_B = c()
+  compte = 0
+  if(k == compte){
+    return()
+  }
+  while(compte < k){
+    xmin = x - distance
+    xmax = x + distance
+    ymin = y - distance
+    ymax = y + distance
+    for(i in xmin:xmax){
+      for(j in ymin:ymax){
+        if(i != 0 | j != 0 ){
+          if (x+i >= 0 & y+j>=0 & x+i <width & y+j<height){
+            if(isFALSE(tableau[x+i,y+j])){
+              tab_list_R = append(tab_list_R,tab[x+i,y+j,1])
+              tab_list_G = append(tab_list_G,tab[x+i,y+j,2])
+              tab_list_B = append(tab_list_B,tab[x+i,y+j,3])
+              compte = compte + 1
+            }
+          }
+        }
+      }
+    }
+    distance = distance + 1
+  }
+  result = c()
+  result$rouge = mean(tab_list_R)  
+  result$vert = mean(tab_list_G)  
+  result$bleu = mean(tab_list_B)  
+   return(result)
+}
+  
+kppv<-function(tab,k = 1){
+  if(class(tab)[1] != "array"){
+    stop("pas un tableau")
+  } 
+  if(length(dim(tab))>3){
+    stop("dimension supérieur à 3")
+  }
+  tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
+  width = ncol(tab)
+  heigth = nrow(tab)
+  x = 1
+  y = 1
+  while (x < width) {
+    while (y < heigth) {
+      if (isTRUE(tableau[x,y])){
+        value = sub_kppv(k,tab,tableau,x,y)
+        tab[x,y,1] = value$rouge
+        tab[x,y,2] = value$vert
+        tab[x,y,3] = value$bleu
+      }
+      y = y + 1
+    }
+    x = x+1
+  }
+  return(tab)
+}
+display(pourcent1)
+display(kppv(pourcent1))
+essai = kppv(pourcent1)
+test = sub_kppv(1,pourcent1,tableau,1,1)
+table((essai[,,1] == 1) & (essai[,,2] == 1) & (essai[,,3] == 1))
+table((pourcent1[,,1] == 1) & (pourcent1[,,2] == 1) & (pourcent1[,,3] == 1))
+```
+
+```{r}
+tab = pourcent1
+tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
+k =1 
+distance = 1
+  x = 2
+  y = 1
+  tab_list_R = c()
+  tab_list_G = c()
+  tab_list_B = c()
+  compte = 0
+  if(k == compte){
+    return()
+  }
+  while(compte < k){
+    xmin = x - distance
+    xmax = x + distance
+    ymin = y - distance
+    ymax = y + distance
+    for(i in xmin:xmax){
+      for(j in ymin:ymax){
+        if(i != 0 | j != 0 ){
+          if (x+i >= 0 & y+j>=0){
+            if(isFALSE(tableau[x+i,y+j])){
+              tab_list_R = append(tab_list_R,tab[x+i,y+j,1])
+              tab_list_G = append(tab_list_G,tab[x+i,y+j,2])
+              tab_list_B = append(tab_list_B,tab[x+i,y+j,3])
+              compte = compte + 1
+            }
+          }
+        }
+      }
+    }
+    distance = distance + 1
+  }
+```
+
+```{r}
+tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
+  width = ncol(tab)
+  heigth = nrow(tab)
+  x = 1
+  y = 1
+  compte = 0
+  while (x < width) {
+    while (y < heigth) {
+      if (isTRUE(tableau[x,y])){
+        compte = compte + 1
+        print(compte)
+      }
+      y = y + 1
+    }
+    x = x+1
+  }
+```
+
