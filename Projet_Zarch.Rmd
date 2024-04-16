@@ -1,6 +1,6 @@
 ---
 title: "Projet Exploratoire"
-author: "Vassili ZARCH"
+author: "Vassili ZARCH, Tristan Mathon, Coemgen Genevey"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -35,30 +35,39 @@ height<-nrow(pourcent50)
 print(height)
 width*height
 sub_kppv <- function(k,tab,tableau,x,y){
-  distance = 1
-   width = ncol(tab)
-  heigth = nrow(tab)
+  distance = 1 #distance au pixel x,y
   tab_list_R = c()
   tab_list_G = c()
   tab_list_B = c()
-  compte = 0
+  compte = 0 #nombre de voisin récupérer
   if(k == compte){
     return()
   }
-  while(compte < k){
-    xmin = x - distance
-    xmax = x + distance
-    ymin = y - distance
-    ymax = y + distance
-    for(i in xmin:xmax){
+  while(compte < k){ # boucle sur x = 1 et y = 209 mais je ne sais pas pourquoi
+    xmin = x - distance #coté gauche du carré des voisns
+    xmax = x + distance # coté droit
+    ymin = y - distance # coté bas 
+    ymax = y + distance # coté haut
+    for(i in xmin:xmax){ # on fait le tour du carré représentant les voisins
       for(j in ymin:ymax){
-        if(i != 0 | j != 0 ){
-          if (x+i >= 0 & y+j>=0 & x+i <width & y+j<height){
-            if(isFALSE(tableau[x+i,y+j])){
-              tab_list_R = append(tab_list_R,tab[x+i,y+j,1])
+        if(i != 0 | j != 0 ){ #ton ne veut pas du pixel 0:0
+          print(x)
+          print(y)
+          if (x+i >= 0 & y+j>=0 & x+i <width & y+j<height){ #on veut rester dans l'image
+            print("maintenant")
+            if(isFALSE(tableau[x+i,y+j])){  #on veut pas prendre d'autres pixels blancs
+              print("pas null")
+              tab_list_R = append(tab_list_R,tab[x+i,y+j,1]) 
               tab_list_G = append(tab_list_G,tab[x+i,y+j,2])
               tab_list_B = append(tab_list_B,tab[x+i,y+j,3])
-              compte = compte + 1
+              compte = compte +1
+              if(compte  == k){
+                result = c()
+                result$rouge = mean(tab_list_R)  #moyenne rouge des voisins
+                result$vert = mean(tab_list_G)  #moyenne vert
+                result$bleu = mean(tab_list_B)  #moyenne bleu
+                return(result)
+              }
             }
           }
         }
@@ -66,11 +75,6 @@ sub_kppv <- function(k,tab,tableau,x,y){
     }
     distance = distance + 1
   }
-  result = c()
-  result$rouge = mean(tab_list_R)  
-  result$vert = mean(tab_list_G)  
-  result$bleu = mean(tab_list_B)  
-   return(result)
 }
   
 kppv<-function(tab,k = 1){
@@ -80,86 +84,32 @@ kppv<-function(tab,k = 1){
   if(length(dim(tab))>3){
     stop("dimension supérieur à 3")
   }
+  load = 0
   tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
   width = ncol(tab)
   heigth = nrow(tab)
-  x = 1
-  y = 1
-  while (x < width) {
-    while (y < heigth) {
-      if (isTRUE(tableau[x,y])){
+  for (x in  1:width) {
+    for (y in 1:heigth) {
+      if (isTRUE(tableau[x,y])){ #on veut corriger les pixels blancs
         value = sub_kppv(k,tab,tableau,x,y)
         tab[x,y,1] = value$rouge
         tab[x,y,2] = value$vert
         tab[x,y,3] = value$bleu
+        load = load + 1
+        print(load)
       }
-      y = y + 1
     }
-    x = x+1
   }
   return(tab)
 }
 display(pourcent1)
-display(kppv(pourcent1))
+display(kppv(pourcent1,1))
 essai = kppv(pourcent1)
-test = sub_kppv(1,pourcent1,tableau,1,1)
-table((essai[,,1] == 1) & (essai[,,2] == 1) & (essai[,,3] == 1))
-table((pourcent1[,,1] == 1) & (pourcent1[,,2] == 1) & (pourcent1[,,3] == 1))
-```
-
-```{r}
+sub_kppv(1,pourcent1,tableau,1,209)
+table((essai[,,1] == 1) & (essai[,,2] == 1) & (essai[,,3] == 1)) #compte le nombre de pixel blanc
+tableau= ((pourcent1[,,1] == 1) & (pourcent1[,,2] == 1) & (pourcent1[,,3] == 1))
+x = 1
+y = 209
 tab = pourcent1
-tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
-k =1 
-distance = 1
-  x = 2
-  y = 1
-  tab_list_R = c()
-  tab_list_G = c()
-  tab_list_B = c()
-  compte = 0
-  if(k == compte){
-    return()
-  }
-  while(compte < k){
-    xmin = x - distance
-    xmax = x + distance
-    ymin = y - distance
-    ymax = y + distance
-    for(i in xmin:xmax){
-      for(j in ymin:ymax){
-        if(i != 0 | j != 0 ){
-          if (x+i >= 0 & y+j>=0){
-            if(isFALSE(tableau[x+i,y+j])){
-              tab_list_R = append(tab_list_R,tab[x+i,y+j,1])
-              tab_list_G = append(tab_list_G,tab[x+i,y+j,2])
-              tab_list_B = append(tab_list_B,tab[x+i,y+j,3])
-              compte = compte + 1
-            }
-          }
-        }
-      }
-    }
-    distance = distance + 1
-  }
+tableau[1,209]
 ```
-
-```{r}
-tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
-  width = ncol(tab)
-  heigth = nrow(tab)
-  x = 1
-  y = 1
-  compte = 0
-  while (x < width) {
-    while (y < heigth) {
-      if (isTRUE(tableau[x,y])){
-        compte = compte + 1
-        print(compte)
-      }
-      y = y + 1
-    }
-    x = x+1
-  }
-```
-
