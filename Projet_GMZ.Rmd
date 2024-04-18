@@ -147,8 +147,8 @@ sub_kppv <- function(k,tab,tableau,x,y){
               tab_list_B = append(tab_list_B,tab[i,j,3])
               compte = compte +1
               if(compte  == k){
-                result = c()
-                result$rouge = mean(tab_list_R)  #moyenne rouge des voisins
+                result = c() #peut-être rajouter des poids pour les pixels qui sont loins avec distance (genre *(1/distance))
+                result$rouge = mean(tab_list_R)  #moyenne rouge des voisins (on remplace mean par sum et on divise par k)
                 result$vert = mean(tab_list_G)  #moyenne vert
                 result$bleu = mean(tab_list_B)  #moyenne bleu
                 return(result)
