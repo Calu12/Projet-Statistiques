@@ -1,0 +1,165 @@
+---
+title: "Projet Exploratoire"
+author: "Vassili ZARCH, Tristan Mathon,Coemgen Genevey"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,eval = TRUE,warning=FALSE, fig.show="hold", out.width="50%",cache = TRUE)
+```
+
+# Introduction
+## but
+```{r}
+library(class)
+source("color_utils.R")
+```
+
+Le but de ce projet est d'évaluer et de comparer les performances de l'algorithme des K plus proche voisin dans le cadre de la reconstitution d'images bruitées. 
+```{r}
+library("png")
+originale<- readPNG("StarWars.png")
+
+pourcent1<- readPNG("Image1pourcent.png")
+pourcent10<- readPNG("Image10pourcent.png")
+pourcent15<- readPNG("Image15pourcent.png")
+pourcent20<- readPNG("Image20pourcent.png")
+pourcent25<- readPNG("Image25pourcent.png")
+pourcent50<- readPNG("Image50pourcent.png")
+
+display(originale)
+tableau_result = test(8)
+
+tableau_result
+```
+
+```{r}
+plot(c(1:48),tableau_result[1,],col = "RED")
+points(c(1:48),tableau_result[2,],col = "GREEN")
+points(c(1:48),tableau_result[3,],col = "BLUE")
+abline(v = 8.5)
+abline(v = 16.5)
+abline(v = 24.5)
+abline(v = 32.5)
+abline(v = 40.5)
+```
+
+```{r}
+test <- function(k){
+  result = c()
+  result1 = c()
+  result10 = c()
+  result15 = c()
+  result20 = c()
+  result25 = c()
+  result50 = c()
+  for (q in 1:k) {
+      result1 = cbind(result1,mse(originale,kppv(pourcent1,q)))
+      result10 = cbind(result10,mse(originale,kppv(pourcent10,q)))
+      result15 = cbind(result15,mse(originale,kppv(pourcent15,q)))
+      result20 = cbind(result20,mse(originale,kppv(pourcent20,q)))
+      result25 = cbind(result25,mse(originale,kppv(pourcent25,q)))
+      result50 = cbind(result50,mse(originale,kppv(pourcent50,q)))
+  }
+  result =  cbind(result,result1) 
+  result =  cbind(result,result10) 
+  result =  cbind(result,result15) 
+  result =  cbind(result,result20) 
+  result =  cbind(result,result25) 
+  result =  cbind(result,result50) 
+  return(result)
+  }
+```
+
+```{r}
+mse <- function(imageO, imageP){
+  O = (imageO[,,1] == 1) & (imageO[,,2] == 1) & (imageO[,,3] == 1) 
+  OP_Rouge = c()
+  OP_Vert = c()
+  OP_Bleu = c()
+  width = ncol(imageO)
+  heigth = nrow(imageO)
+  for (i in  1:width) {
+    for (j in 1:heigth) {
+      if (isTRUE(O[i,j])){ #on veut que des pixels blancs
+        OP_Rouge = append(OP_Rouge,(imageO[i,j,1]-imageP[i,j,1])^2) 
+        OP_Vert = append(OP_Vert,(imageO[i,j,2]-imageP[i,j,2])^2)
+        OP_Bleu = append(OP_Bleu,(imageO[i,j,3]-imageP[i,j,3])^2)
+      }
+    }
+  }
+  result = c()
+  result$rouge = sqrt(mean(OP_Rouge))  #moyenne rouge 
+  result$vert = sqrt(mean(OP_Vert))  #moyenne vert
+  result$bleu = sqrt(mean(OP_Bleu))  #moyenne bleu
+  return(result)
+}
+```
+
+
+```{r}
+kppv<-function(tab,k = 1){
+  if(length(dim(tab))>3){
+    stop("dimension supérieur à 3")
+  }
+  tableau = (tab[,,1] == 1) & (tab[,,2] == 1) & (tab[,,3] == 1) 
+  width = ncol(tab)
+  heigth = nrow(tab)
+  for (x in  1:width) {
+    for (y in 1:heigth) {
+      if (isTRUE(tableau[x,y])){ #on veut corriger les pixels blancs
+        value = sub_kppv(k,tab,tableau,x,y)
+        tab[x,y,1] = value$rouge
+        tab[x,y,2] = value$vert
+        tab[x,y,3] = value$bleu
+      }
+    }
+  }
+  return(tab)
+}
+```
+
+```{r}
+sub_kppv <- function(k,tab,tableau,x,y){
+  distance = 1 #distance au pixel x,y
+  tab_list_R = c()
+  tab_list_G = c()
+  tab_list_B = c()
+  width = ncol(tab)
+  height = nrow(tab)
+  compte = 0 #nombre de voisin récupérer
+  if(k == compte){
+    return()
+  }
+  while(compte < k){
+    xmin = x - distance #coté gauche du carré des voisins
+    xmax = x + distance # coté droit
+    ymin = y - distance # coté bas 
+    ymax = y + distance # coté haut
+    for(i in xmin:xmax){ # on fait le tour du carré représentant les voisins
+      for(j in ymin:ymax){
+        if(i != 0 | j != 0 ){ #on ne veut pas du pixel 0:0
+          if (i >= 0 & j>=0 & i <width & j<height){ #on veut rester dans l'image
+            if(isFALSE(tableau[i,j])){  #on veut pas prendre d'autres pixels blancs
+              tab_list_R = append(tab_list_R,tab[i,j,1]) 
+              tab_list_G = append(tab_list_G,tab[i,j,2])
+              tab_list_B = append(tab_list_B,tab[i,j,3])
+              compte = compte +1
+              if(compte  == k){
+                result = c()
+                result$rouge = mean(tab_list_R)  #moyenne rouge des voisins
+                result$vert = mean(tab_list_G)  #moyenne vert
+                result$bleu = mean(tab_list_B)  #moyenne bleu
+                return(result)
+              }
+            }
+          }
+        }
+      }
+    }
+    distance = distance + 1
+  }
+}
+```
+
