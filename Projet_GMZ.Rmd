@@ -2,7 +2,9 @@
 title: "Projet Exploratoire"
 author: "Vassili ZARCH, Tristan Mathon,Coemgen Genevey"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -10,13 +12,16 @@ knitr::opts_chunk$set(echo = FALSE,eval = TRUE,warning=FALSE, fig.show="hold", o
 ```
 
 # Introduction
+
 ## but
+
 ```{r}
 library(class)
 source("color_utils.R")
 ```
 
-Le but de ce projet est d'évaluer et de comparer les performances de l'algorithme des K plus proche voisin dans le cadre de la reconstitution d'images bruitées. 
+Le but de ce projet est d'évaluer et de comparer les performances de l'algorithme des K plus proche voisin dans le cadre de la reconstitution d'images bruitées.
+
 ```{r}
 library("png")
 originale<- readPNG("StarWars.png")
@@ -31,6 +36,7 @@ pourcent50<- readPNG("Image50pourcent.png")
 
 ```{r}
 test <- function(k){
+  Kopti=5#le nombre optimal de voisins pour la reconstruction de l'image (mse le plus bas)
   result = c()
   result1 = c()
   result10 = c()
@@ -39,12 +45,57 @@ test <- function(k){
   result25 = c()
   result50 = c()
   for (q in 1:k) {
-      result1 = cbind(result1,mse(originale,kppv(pourcent1,q)))
-      result10 = cbind(result10,mse(originale,kppv(pourcent10,q)))
-      result15 = cbind(result15,mse(originale,kppv(pourcent15,q)))
-      result20 = cbind(result20,mse(originale,kppv(pourcent20,q)))
-      result25 = cbind(result25,mse(originale,kppv(pourcent25,q)))
-      result50 = cbind(result50,mse(originale,kppv(pourcent50,q)))
+      kppv1=kppv(pourcent1,q)#reconstruit l'image avec q voisins
+      result1 = cbind(result1,mse(originale,kppv1))#calcul l'erreur par rapport à l'image originale
+      #afficher la reconstitution de l'image bruitée à 1% pour Kopti voisins
+      if(q==Kopti){
+        plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("1% de bruitage et k=",Kopti))
+        rasterImage(kppv1, 0, 1, 1, 2)
+      }
+      
+      kppv10=kppv(pourcent10,q)#reconstruit l'image avec q voisins
+      result10 = cbind(result10,mse(originale,kppv10))#calcul l'erreur par rapport à l'image originale
+      #afficher la reconstitution de l'image bruitée à 10% pour Kopti voisins
+      if(q==Kopti){
+        plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("10% de bruitage et k=",Kopti))
+        rasterImage(kppv10, 0, 1, 1, 2)
+      }
+      
+      kppv15=kppv(pourcent15,q)#reconstruit l'image avec q voisins
+      result15 = cbind(result15,mse(originale,kppv15))#calcul l'erreur par rapport à l'image originale
+      #afficher la reconstitution de l'image bruitée à 15% pour Kopti voisins
+      if(q==Kopti){
+        plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("15% de bruitage et k=",Kopti))
+        rasterImage(kppv15, 0, 1, 1, 2)
+      }
+      
+      kppv20=kppv(pourcent20,q)#reconstruit l'image avec q voisins
+      result20 = cbind(result20,mse(originale,kppv20))#calcul l'erreur par rapport à l'image originale
+      #afficher la reconstitution de l'image bruitée à 20% pour Kopti voisins
+      if(q==Kopti){
+        plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("20% de bruitage et k=",Kopti))
+        rasterImage(kppv20, 0, 1, 1, 2)
+      }
+      
+      kppv25=kppv(pourcent25,q)#reconstruit l'image avec q voisins
+      result25 = cbind(result25,mse(originale,kppv25))#calcul l'erreur par rapport à l'image originale
+      #afficher la reconstitution de l'image bruitée à 25% pour Kopti voisins
+      if(q==Kopti){
+        plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("25% de bruitage et k=",Kopti))
+        rasterImage(kppv25, 0, 1, 1, 2)
+      }
+      
+      kppv50=kppv(pourcent50,q)#reconstruit l'image avec q voisins
+      result50 = cbind(result50,mse(originale,kppv50))#calcul l'erreur par rapport à l'image originale
+      #afficher la reconstitution de l'image bruitée à 50% pour Kopti voisins
+      if(q==Kopti){
+        plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("50% de bruitage et k=",Kopti))
+        rasterImage(kppv50, 0, 1, 1, 2)
+      }
+      
+      #afficher les reconstitutions de l'image bruitée à 50% pour 1 à k voisins
+      plot(0:2, 0:2, type = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", main = paste("50% de bruitage et k=",q))
+      rasterImage(kppv50, 0, 1, 1, 2)
   }
   result =  cbind(result,result1) 
   result =  cbind(result,result10) 
@@ -61,6 +112,7 @@ mse <- function(imageO, imageP){
   return(mean((imageO-imageP)^2))
 }
 ```
+
 
 
 ```{r}
@@ -132,9 +184,9 @@ sub_kppv <- function(k,tab,tableau,x,y){
 ```
 
 ```{r cache=TRUE}
-tableau_result = test(9)
-```
 
+tableau_result = test(8)
+```
 
 ```{r cache=TRUE}
 tableau_result
@@ -143,12 +195,20 @@ for (value in tableau_result) {
   valuesMSE = append(valuesMSE,value)
 }
 plot(valuesMSE,col = 'RED')
-abline(v = 9.5)
-abline(v = 18.5)
-abline(v = 27.5)
-abline(v = 36.5)
-abline(v = 45.5)
+abline(v = 8.5)
+abline(v = 16.5)
+abline(v = 24.5)
+abline(v = 32.5)
+abline(v = 40.5)
+
+print("MSE pour 1 à 8 voisins sur 50% de bruit")
+for(i in 41 : 48){print(tableau_result[i])}
+
+print("MSE pour 5 voisins sur 1%, 10%, 15%, 20%, 25% et 50% de bruit")
+print(tableau_result[5])
+print(tableau_result[13])
+print(tableau_result[21])
+print(tableau_result[29])
+print(tableau_result[37])
+print(tableau_result[45])
 ```
-
-
-
